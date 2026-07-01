@@ -7,6 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  ANALYTICS (currently off)
+  To turn on tracking of prices entered, goals chosen, and decision
+  button clicks, sign up free at https://www.goatcounter.com, create
+  a site, and replace YOURCODE below with the subdomain it gives you.
+  Then uncomment the script tag.
+
+  <script data-goatcounter="https://YOURCODE.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+-->
 <style>
   :root {
     --cream: #F4EFE3;
@@ -520,6 +531,27 @@
     { label: 'cinema ticket', price: 12, singular: 'trip to the cinema', plural: 'trips to the cinema' }
   ];
 
+  // Single tracking call used everywhere below. Fires on whichever
+  // analytics tool is present, does nothing if none is set up yet.
+  // See the GoatCounter/GA4 setup notes for wiring one in.
+  function trackEvent(name, params) {
+    params = params || {};
+
+    if (typeof window.goatcounter === 'object' && window.goatcounter.count) {
+      window.goatcounter.count({
+        path: name,
+        title: JSON.stringify(params),
+        event: true
+      });
+    }
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', name, params);
+    }
+    if (typeof window.plausible === 'function') {
+      window.plausible(name, { props: params });
+    }
+  }
+
   let refIndex = 0;
   let lastPrice = 0;
 
@@ -557,14 +589,7 @@
       decisionFollowup.textContent = followupText[choice] || '';
       decisionFollowup.classList.add('show');
 
-      // Fires only if the page owner has added an analytics tool.
-      // Without one, this click only affects this visitor's own screen.
-      if (typeof window.plausible === 'function') {
-        window.plausible('Decision', { props: { choice: choice } });
-      }
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'purchase_decision', { choice: choice });
-      }
+      trackEvent('decision', { choice: choice });
     });
   });
 
@@ -662,6 +687,16 @@
     });
     decisionFollowup.classList.remove('show');
     decisionFollowup.textContent = '';
+
+    // Deliberately not sending the raw monthly income value here —
+    // it's the one genuinely sensitive field on this form. Price and
+    // goal are enough to answer "what do people enter" and "which
+    // goals do they pick" without logging anyone's actual salary.
+    trackEvent('calculate', {
+      price: Math.round(price),
+      goal: goal,
+      days_of_life: daysLabel
+    });
 
     result.classList.add('show');
     resultBar.style.width = '0%';
