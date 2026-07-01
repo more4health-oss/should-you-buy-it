@@ -295,6 +295,125 @@
     opacity: 1;
   }
 
+  .result .fy-headline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--coral-text);
+    margin: 0 0 0.75rem;
+  }
+
+  .result .vivid {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--coral-text);
+    margin: 0 0 0.9rem;
+    line-height: 1.45;
+  }
+
+  .reframe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--coral);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 0.9rem;
+  }
+
+  .reframe-btn:hover {
+    text-decoration: underline;
+  }
+
+  .reframe-btn svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .reframe-btn.spin svg {
+    transform: rotate(180deg);
+  }
+
+  .result .fy-note {
+    font-size: 13px;
+    color: var(--coral-text);
+    opacity: 0.75;
+    line-height: 1.55;
+    margin: 1rem 0 0;
+  }
+
+  .decision-block {
+    margin-top: 1.25rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(74, 27, 12, 0.14);
+  }
+
+  .decision-q {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--coral-text);
+    margin: 0 0 0.9rem;
+    line-height: 1.5;
+  }
+
+  .decision-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .decision-btn {
+    flex: 1;
+    min-width: 140px;
+    background: transparent;
+    border: 1px solid var(--coral);
+    color: var(--coral-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .decision-btn:hover {
+    background: rgba(216, 90, 48, 0.08);
+  }
+
+  .decision-btn.selected {
+    background: var(--coral);
+    color: var(--coral-bg);
+  }
+
+  .decision-btn:disabled {
+    cursor: default;
+  }
+
+  .decision-btn:disabled:not(.selected) {
+    opacity: 0.4;
+  }
+
+  .decision-followup {
+    display: none;
+    font-size: 13px;
+    color: var(--coral-text);
+    opacity: 0.85;
+    margin: 0.9rem 0 0;
+    font-style: italic;
+  }
+
+  .decision-followup.show {
+    display: block;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .cta { transition: none; }
   }
@@ -349,24 +468,105 @@
   </form>
 
   <div class="result" id="result">
-    <p class="eyebrow-small">Your real cost</p>
+    <p class="eyebrow-small">Future you says</p>
+    <p class="fy-headline" id="fy-headline"></p>
     <p class="big-number" id="result-number"></p>
-    <p class="headline" id="result-headline"></p>
     <div class="bar-track">
       <div class="bar-fill" id="result-bar"></div>
     </div>
+    <p class="vivid" id="result-vivid"></p>
+    <button type="button" class="reframe-btn" id="reframe-btn">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 3a6 6 0 1 0 1.5 4M13 3v3.5H9.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      See it another way
+    </button>
     <p class="detail" id="result-detail"></p>
+    <p class="fy-note" id="fy-note"></p>
+
+    <div class="decision-block">
+      <p class="decision-q" id="decision-q"></p>
+      <div class="decision-btns">
+        <button type="button" class="decision-btn" data-choice="buy">I'd still buy it</button>
+        <button type="button" class="decision-btn" data-choice="think">I'll think about it</button>
+      </div>
+      <p class="decision-followup" id="decision-followup"></p>
+    </div>
   </div>
 </div>
 
 <script>
   const form = document.getElementById('cost-form');
   const result = document.getElementById('result');
+  const fyHeadline = document.getElementById('fy-headline');
   const resultNumber = document.getElementById('result-number');
-  const resultHeadline = document.getElementById('result-headline');
   const resultBar = document.getElementById('result-bar');
   const resultDetail = document.getElementById('result-detail');
+  const resultVivid = document.getElementById('result-vivid');
+  const fyNote = document.getElementById('fy-note');
+  const reframeBtn = document.getElementById('reframe-btn');
+  const decisionQ = document.getElementById('decision-q');
+  const decisionBtns = document.querySelectorAll('.decision-btn');
+  const decisionFollowup = document.getElementById('decision-followup');
   const moneyInputs = document.querySelectorAll('[data-money]');
+
+  // Everyday reference prices used to translate an abstract amount into
+  // something the person can actually picture and feel, rather than a
+  // percentage. This is the whole trick: nobody feels "5% of income",
+  // but everyone feels "11 takeaway coffees".
+  const references = [
+    { label: 'takeaway coffee', price: 3.50, singular: 'takeaway coffee', plural: 'takeaway coffees' },
+    { label: 'pint', price: 5.50, singular: 'pint at the pub', plural: 'pints at the pub' },
+    { label: 'takeaway', price: 22, singular: 'Friday night takeaway', plural: 'Friday night takeaways' },
+    { label: 'streaming month', price: 7.99, singular: 'month of a streaming subscription', plural: 'months of a streaming subscription' },
+    { label: 'cinema ticket', price: 12, singular: 'trip to the cinema', plural: 'trips to the cinema' }
+  ];
+
+  let refIndex = 0;
+  let lastPrice = 0;
+
+  function buildVividText(price) {
+    const ref = references[refIndex % references.length];
+    const count = price / ref.price;
+    const rounded = count < 2 ? count.toFixed(1) : Math.round(count);
+    const noun = rounded == 1 ? ref.singular : ref.plural;
+    return 'That\u2019s about ' + rounded + ' ' + noun + '.';
+  }
+
+  reframeBtn.addEventListener('click', function () {
+    if (!lastPrice) return;
+    refIndex++;
+    reframeBtn.classList.add('spin');
+    setTimeout(function () { reframeBtn.classList.remove('spin'); }, 300);
+    resultVivid.textContent = buildVividText(lastPrice);
+  });
+
+  const followupText = {
+    buy: 'Noted — go in with your eyes open.',
+    think: 'Fair enough. Future you says thanks.'
+  };
+
+  decisionBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const choice = btn.getAttribute('data-choice');
+
+      decisionBtns.forEach(function (b) {
+        b.classList.remove('selected');
+        b.disabled = true;
+      });
+      btn.classList.add('selected');
+
+      decisionFollowup.textContent = followupText[choice] || '';
+      decisionFollowup.classList.add('show');
+
+      // Fires only if the page owner has added an analytics tool.
+      // Without one, this click only affects this visitor's own screen.
+      if (typeof window.plausible === 'function') {
+        window.plausible('Decision', { props: { choice: choice } });
+      }
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'purchase_decision', { choice: choice });
+      }
+    });
+  });
 
   // Block anything that isn't a digit, comma, or single decimal point
   // as the person types, so bad characters never make it into the field.
@@ -434,15 +634,34 @@
     const percentOfIncome = (price / income) * 100;
     const daysOfPay = (price / income) * 30;
     const barWidth = Math.min(percentOfIncome, 100);
+    const daysLabel = daysOfPay < 1 ? daysOfPay.toFixed(1) : Math.round(daysOfPay * 10) / 10;
 
-    resultNumber.innerHTML = percentOfIncome.toFixed(1) + '<span class="unit">% of your month</span>';
-    resultHeadline.textContent = '£' + price.toLocaleString() + ' spent now is roughly ' + daysOfPay.toFixed(1) + ' days of your take-home pay.';
+    let reaction = 'Wait.';
+    if (percentOfIncome < 2) reaction = 'Fair enough.';
+    else if (percentOfIncome < 8) reaction = 'Worth a pause.';
+    fyHeadline.textContent = reaction;
 
-    let detail = 'Every pound here is a pound not going toward your goal.';
+    resultNumber.innerHTML = daysLabel + '<span class="unit">days of your working life</span>';
+
+    lastPrice = price;
+    refIndex = 0;
+    resultVivid.textContent = buildVividText(price);
+
+    let detail = 'It also means it isn\u2019t going toward your goal.';
     if (goal) {
-      detail = 'Every pound here is a pound not going toward: <strong>' + goal.toLowerCase() + '</strong>.';
+      detail = 'It\u2019s also money that isn\u2019t going toward: <strong>' + goal.toLowerCase() + '</strong>.';
     }
     resultDetail.innerHTML = detail;
+
+    fyNote.textContent = 'You\u2019ll probably forget this purchase long before you\u2019d forget the peace of mind of having savings.';
+
+    decisionQ.textContent = 'If this cost ' + daysLabel + ' days of your life instead of \u00a3' + price.toLocaleString() + ' \u2014 would you still buy it?';
+    decisionBtns.forEach(function (b) {
+      b.disabled = false;
+      b.classList.remove('selected');
+    });
+    decisionFollowup.classList.remove('show');
+    decisionFollowup.textContent = '';
 
     result.classList.add('show');
     resultBar.style.width = '0%';
