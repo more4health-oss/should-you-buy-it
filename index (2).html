@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should you buy it?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F4EFE3;
+    --cream-light: #FBF8F0;
+    --sage-50: #EAF3DE;
+    --sage-200: #97C459;
+    --sage-600: #3B6D11;
+    --sage-800: #27500A;
+    --sage-900: #173404;
+    --coral: #D85A30;
+    --coral-bg: #FAECE7;
+    --coral-text: #4A1B0C;
+    --charcoal: #2C2C2A;
+    --muted: #5F5E5A;
+    --hint: #888780;
+    --border: #97C459;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.25rem;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .eyebrow {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sage-600);
+    font-weight: 500;
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    text-align: center;
+    font-size: clamp(30px, 6vw, 42px);
+    font-weight: 500;
+    line-height: 1.25;
+    margin: 0 0 1.1rem;
+    letter-spacing: -0.01em;
+  }
+
+  h1 .underline {
+    text-decoration: underline;
+    text-decoration-color: var(--sage-200);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  h1 .accent {
+    font-style: italic;
+    color: var(--sage-600);
+  }
+
+  p.lede {
+    text-align: center;
+    font-size: 17px;
+    color: var(--charcoal);
+    font-weight: 500;
+    margin: 0 0 0.35rem;
+  }
+
+  p.sub {
+    text-align: center;
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0 0 1.75rem;
+    line-height: 1.5;
+  }
+
+  .example {
+    background: var(--sage-50);
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 0 0 2rem;
+    text-align: center;
+  }
+
+  .example span {
+    font-size: 13.5px;
+    color: var(--sage-800);
+    line-height: 1.5;
+  }
+
+  .card {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sage-600);
+    margin-bottom: 6px;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    background: var(--cream-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%233B6D11' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--sage-600);
+    box-shadow: 0 0 0 3px rgba(99, 153, 34, 0.12);
+  }
+
+  .field input::placeholder {
+    color: var(--hint);
+  }
+
+  .hint {
+    font-size: 11.5px;
+    color: var(--hint);
+    font-style: italic;
+    margin: 6px 0 0;
+  }
+
+  .cta {
+    width: 100%;
+    margin-top: 0.6rem;
+    background: var(--coral);
+    color: var(--coral-bg);
+    border: none;
+    border-radius: 10px;
+    height: 52px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+
+  .cta:hover {
+    background: #c34e26;
+  }
+
+  .cta:active {
+    transform: scale(0.98);
+  }
+
+  .footnote {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--hint);
+    margin: 12px 0 0;
+  }
+
+  .result {
+    display: none;
+    margin-top: 1.75rem;
+    background: var(--coral-bg);
+    border-radius: 14px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    text-align: left;
+  }
+
+  .result.show {
+    display: block;
+    animation: rise 0.35s ease;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result .eyebrow-small {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--coral);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .result .big-number {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(38px, 9vw, 52px);
+    font-weight: 500;
+    color: var(--coral-text);
+    line-height: 1;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .result .big-number .unit {
+    font-size: 0.5em;
+    font-weight: 500;
+    opacity: 0.75;
+  }
+
+  .result .headline {
+    font-size: 15px;
+    color: var(--coral-text);
+    margin: 0 0 1.1rem;
+    line-height: 1.5;
+  }
+
+  .result .bar-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(74, 27, 12, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 1.1rem;
+  }
+
+  .result .bar-fill {
+    height: 100%;
+    background: var(--coral);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .result .detail {
+    font-size: 13.5px;
+    color: var(--coral-text);
+    opacity: 0.85;
+    margin: 0;
+    line-height: 1.55;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(74, 27, 12, 0.14);
+  }
+
+  .result .detail strong {
+    font-weight: 600;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <p class="eyebrow">Before you check out</p>
+
+  <h1>
+    <span class="underline">Should you</span>
+    <span class="accent">buy it?</span>
+  </h1>
+
+  <p class="lede">Every purchase costs more than the price tag.</p>
+  <p class="sub">Find out what this buy really costs you — in under 30 seconds.</p>
+
+  <div class="example">
+    <span id="example-text">£40 trainers = 3 weeks of oat milk lattes, or a missed month of savings.</span>
+  </div>
+
+  <form class="card" id="cost-form">
+    <div class="field">
+      <label for="price">How much does it cost?</label>
+      <input type="text" inputmode="decimal" id="price" placeholder="£500" required>
+    </div>
+
+    <div class="field">
+      <label for="income">Monthly take-home</label>
+      <input type="text" inputmode="decimal" id="income" placeholder="£2,500" required>
+      <p class="hint">Just for the maths — nothing saved, nothing sent anywhere.</p>
+    </div>
+
+    <div class="field">
+      <label for="goal">What's your biggest financial goal?</label>
+      <select id="goal" required>
+        <option value="" selected disabled>Choose from the list</option>
+        <option>Build an emergency fund</option>
+        <option>Pay off debt</option>
+        <option>Save for a house</option>
+        <option>Save for a holiday</option>
+        <option>Just spend less on impulse buys</option>
+      </select>
+    </div>
+
+    <button type="submit" class="cta">Show my real cost</button>
+    <p class="footnote">Free, no account needed.</p>
+  </form>
+
+  <div class="result" id="result">
+    <p class="eyebrow-small">Your real cost</p>
+    <p class="big-number" id="result-number"></p>
+    <p class="headline" id="result-headline"></p>
+    <div class="bar-track">
+      <div class="bar-fill" id="result-bar"></div>
+    </div>
+    <p class="detail" id="result-detail"></p>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('cost-form');
+  const result = document.getElementById('result');
+  const resultNumber = document.getElementById('result-number');
+  const resultHeadline = document.getElementById('result-headline');
+  const resultBar = document.getElementById('result-bar');
+  const resultDetail = document.getElementById('result-detail');
+
+  function parseMoney(value) {
+    const n = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const price = parseMoney(document.getElementById('price').value);
+    const income = parseMoney(document.getElementById('income').value);
+    const goal = document.getElementById('goal').value;
+
+    if (price <= 0 || income <= 0) {
+      return;
+    }
+
+    const percentOfIncome = (price / income) * 100;
+    const daysOfPay = (price / income) * 30;
+    const barWidth = Math.min(percentOfIncome, 100);
+
+    resultNumber.innerHTML = percentOfIncome.toFixed(1) + '<span class="unit">% of your month</span>';
+    resultHeadline.textContent = '£' + price.toLocaleString() + ' spent now is roughly ' + daysOfPay.toFixed(1) + ' days of your take-home pay.';
+
+    let detail = 'Every pound here is a pound not going toward your goal';
+    if (goal) {
+      detail = 'Every pound here is a pound not going toward: <strong>' + goal.toLowerCase() + '</strong>.';
+    } else {
+      detail += '.';
+    }
+    resultDetail.innerHTML = detail;
+
+    result.classList.add('show');
+    resultBar.style.width = '0%';
+    requestAnimationFrame(function () {
+      resultBar.style.width = barWidth + '%';
+    });
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+</script>
+
+</body>
+</html>
